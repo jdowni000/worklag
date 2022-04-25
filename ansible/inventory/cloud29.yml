@@ -1,0 +1,14 @@
+[all:vars]
+
+[hv]
+e22-h14-b04-fc640.rdu2.scalelab.redhat.com bmc_address=mgmt-e22-h14-b04-fc640.rdu2.scalelab.redhat.com vendor=Dell
+
+[hv:vars]
+ansible_user=root
+ansible_ssh_pass=100yard-
+bmc_user=quads
+bmc_password=rdu2@1787
+
+# networking variables
+baremetal_nic=ens2f0
+provisioning_nic=ens2f1

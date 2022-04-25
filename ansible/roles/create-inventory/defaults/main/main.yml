@@ -1,0 +1,20 @@
+---
+# create-inventory default vars
+
+ocp_inventory_override: ''
+
+# Master nodes "consume" the first 7 address out of the controlplane_network, workers start after this offset
+bm_worker_node_offset: 7
+
+################################################################################
+# Var(s) for bare-metal hypervisors and emulated bare-metal SNOs
+################################################################################
+# Enables placing extra machines as hypervisors in the inventory and generating the inventory of emulated bare-metal
+# SNOs on those hypervisors
+hv_inventory: false
+
+# ssh password for hypervisors
+hv_ssh_pass:
+
+hv_ip_offset: 0
+

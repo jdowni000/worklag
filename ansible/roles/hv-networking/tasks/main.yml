@@ -1,0 +1,70 @@
+---
+# hv networking setup tasks
+
+- name: Clean lab interfaces
+  shell: |
+    /root/clean-interfaces.sh --nuke
+
+- name: Restart NetworkManager to remove lab interfaces
+  systemd:
+    state: restarted
+    name: NetworkManager
+
+- name: Stop and disable iptables
+  systemd:
+    state: stopped
+    enabled: false
+    name: iptables
+
+#- name: Delete network connection
+#  shell: |
+#    nmcli con del "Wired connection 2"
+#    nmcli con del "Wired connection 3"
+    
+
+- name: Create the baremetal bridge
+  nmcli:
+    type: bridge
+    conn_name: baremetal
+    ifname: baremetal
+    state: present
+
+
+- name: Create the provisioning bridge
+  nmcli:
+    type: bridge
+    conn_name: provisioning
+    ifname: provisioning
+    state: present
+
+#- name: Bind the interface to the baremetal bridge
+#  shell: |
+#    nmcli con add type ethernet slave-type bridge con-name prov-bridge-port1 ifname {{ provisioning_nic }} master prov-bridge
+
+- name: show the provisioning nic variable
+  debug:
+    var: provisioning_nic
+
+- name: Bind the interface to the baremetal bridge
+  nmcli:
+    type: bridge-slave
+    conn_name: "{{ baremetal_nic }}"
+    ifname: "{{ baremetal_nic }}"
+    master: baremetal
+    state: present
+
+- name: Bind the interface to the provsioning bridge
+  nmcli:
+    type: bridge-slave
+    conn_name: "{{ provisioning_nic }}"
+    ifname: "{{ provisioning_nic }}"
+    master: provisioning
+    state: present
+
+- name: Enable bridges and the bridge interfaces
+  shell: |
+   nmcli con up baremetal
+   nmcli con up provisioning
+   nmcli con up "{{ baremetal_nic }}"
+   nmcli con up "{{ provisioning_nic }}"
+
