@@ -34,10 +34,3 @@ e22-h18-b01-fc640.rdu2.scalelab.redhat.com bmc_address=mgmt-e22-h18-b01-fc640.rd
 e22-h18-b02-fc640.rdu2.scalelab.redhat.com bmc_address=mgmt-e22-h18-b02-fc640.rdu2.scalelab.redhat.com vendor=Dell ip=192.168.122.11 nic=eno2 
 e22-h18-b03-fc640.rdu2.scalelab.redhat.com bmc_address=mgmt-e22-h18-b03-fc640.rdu2.scalelab.redhat.com vendor=Dell ip=192.168.122.12 nic=eno2 
 e22-h18-b04-fc640.rdu2.scalelab.redhat.com bmc_address=mgmt-e22-h18-b04-fc640.rdu2.scalelab.redhat.com vendor=Dell ip=192.168.122.13 nic=eno2 
-
-[hv:vars]
-ansible_user=root
-ansible_ssh_pass=
-bmc_user=quads
-bmc_password=rdu2@1787
-network_prefix=24

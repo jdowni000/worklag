@@ -7,7 +7,7 @@ rh_labs:
 lab: scalelab
 lab_cloud: cloud29
 cluster_type: bm
-worker_node_count: 1
+worker_node_count: None
 
 # Lab Network type, applies to sno cluster_type only
 # Set this variable if you want to host your SNO cluster on lab public routable
@@ -51,3 +51,18 @@ setup_gogs: false
 # Use in conjunction with ipv6 based clusters
 use_disconnected_registry: false
 
+################################################################################
+# OCP node vars
+################################################################################
+# Network configuration for all bm cluster and rwn control-plane nodes
+# Network configuration for public VLAN based sno cluster_type deployment
+controlplane_lab_interface: eno1np0
+
+# Network configuration for public VLAN based sno cluster_type deployment
+controlplane_pub_network_cidr:
+controlplane_pub_network_gateway:
+jumbo_mtu: false
+
+# Network only for remote worker nodes
+rwn_lab_interface: eno1np0
+rwn_network_interface: ens1f1

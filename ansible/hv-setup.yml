@@ -6,12 +6,12 @@
 # ansible-playbook -i ansible/inventory/cloud29.local ansible/hv-setup.yaml
 
 - name: Setup hypervisor machines to host virtual worker nodes
-  hosts: hypervisor
+  hosts: hv
   vars_files:
   - vars/hv.yml
   - vars/lab.yml
   roles:
     - hv-install
-    - hv-networking
-    - hv-libvirt
-    - hv-worker-create-vms
+      #- hv-networking
+      #- hv-libvirt
+      #- hv-worker-create-vms

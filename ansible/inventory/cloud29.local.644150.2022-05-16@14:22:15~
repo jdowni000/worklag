@@ -1,0 +1,37 @@
+[all:vars]
+allocation_node_count=10
+
+
+[bastion]
+e22-h12-b03-fc640.rdu2.scalelab.redhat.com ansible_ssh_user=root bmc_address=mgmt-e22-h12-b03-fc640.rdu2.scalelab.redhat.com
+
+[bastion:vars]
+bmc_user=quads
+bmc_password=rdu2@1787
+
+[controlplane]
+e22-h12-b04-fc640 bmc_address=mgmt-e22-h12-b04-fc640.rdu2.scalelab.redhat.com network_mac=00:4e:01:3e:61:39 lab_mac=00:4e:01:3e:61:38 ip=192.168.122.5 vendor=Dell
+rdu2 bmc_address=mgmt-e22-h14-b01-fc640.rdu2.scalelab.redhat.com network_mac=00:4e:01:39:7f:92 lab_mac=00:4e:01:39:7f:91 ip=192.168.122.6 vendor=Dell
+scalelab bmc_address=mgmt-e22-h14-b02-fc640.rdu2.scalelab.redhat.com network_mac=00:4e:01:39:7f:9f lab_mac=00:4e:01:39:7f:9e ip=192.168.122.7 vendor=Dell
+
+[controlplane:vars]
+role=master
+boot_iso=discovery.iso
+bmc_user=quads
+bmc_password=rdu2@1787
+lab_interface=eno1np0
+network_interface=eth0
+network_prefix=24
+gateway=192.168.122.1
+dns1=192.168.122.1
+
+[worker]
+
+
+[hypervisor]
+{'arch': 'x86_64', 'cpu': '2', 'disk': '20', 'mac': ['00:4e:01:39:7f:ac', '3c:fd:fe:e7:a3:90', '3c:fd:fe:e7:a3:91'], 'memory': '1024', 'pm_addr': 'mgmt-e22-h14-b03-fc640.rdu2.scalelab.redhat.com', 'pm_password': 'rdu2@1787', 'pm_type': 'pxe_ipmitool', 'pm_user': 'quads'} ansible_ssh_user=root bmc_address=mgmt-{'arch': 'x86_64', 'cpu': '2', 'disk': '20', 'mac': ['00:4e:01:39:7f:ac', '3c:fd:fe:e7:a3:90', '3c:fd:fe:e7:a3:91'], 'memory': '1024', 'pm_addr': 'mgmt-e22-h14-b03-fc640.rdu2.scalelab.redhat.com', 'pm_password': 'rdu2@1787', 'pm_type': 'pxe_ipmitool', 'pm_user': 'quads'}
+{'arch': 'x86_64', 'cpu': '2', 'disk': '20', 'mac': ['00:4e:01:39:7f:b9', '3c:fd:fe:e7:99:00', '3c:fd:fe:e7:99:01'], 'memory': '1024', 'pm_addr': 'mgmt-e22-h14-b04-fc640.rdu2.scalelab.redhat.com', 'pm_password': 'rdu2@1787', 'pm_type': 'pxe_ipmitool', 'pm_user': 'quads'} ansible_ssh_user=root bmc_address=mgmt-{'arch': 'x86_64', 'cpu': '2', 'disk': '20', 'mac': ['00:4e:01:39:7f:b9', '3c:fd:fe:e7:99:00', '3c:fd:fe:e7:99:01'], 'memory': '1024', 'pm_addr': 'mgmt-e22-h14-b04-fc640.rdu2.scalelab.redhat.com', 'pm_password': 'rdu2@1787', 'pm_type': 'pxe_ipmitool', 'pm_user': 'quads'}
+{'arch': 'x86_64', 'cpu': '2', 'disk': '20', 'mac': ['00:4e:01:3d:84:92', '3c:fd:fe:e6:01:40', '3c:fd:fe:e6:01:41'], 'memory': '1024', 'pm_addr': 'mgmt-e22-h18-b01-fc640.rdu2.scalelab.redhat.com', 'pm_password': 'rdu2@1787', 'pm_type': 'pxe_ipmitool', 'pm_user': 'quads'} ansible_ssh_user=root bmc_address=mgmt-{'arch': 'x86_64', 'cpu': '2', 'disk': '20', 'mac': ['00:4e:01:3d:84:92', '3c:fd:fe:e6:01:40', '3c:fd:fe:e6:01:41'], 'memory': '1024', 'pm_addr': 'mgmt-e22-h18-b01-fc640.rdu2.scalelab.redhat.com', 'pm_password': 'rdu2@1787', 'pm_type': 'pxe_ipmitool', 'pm_user': 'quads'}
+{'arch': 'x86_64', 'cpu': '2', 'disk': '20', 'mac': ['00:4e:01:3d:84:9f', '3c:fd:fe:e6:01:70', '3c:fd:fe:e6:01:71'], 'memory': '1024', 'pm_addr': 'mgmt-e22-h18-b02-fc640.rdu2.scalelab.redhat.com', 'pm_password': 'rdu2@1787', 'pm_type': 'pxe_ipmitool', 'pm_user': 'quads'} ansible_ssh_user=root bmc_address=mgmt-{'arch': 'x86_64', 'cpu': '2', 'disk': '20', 'mac': ['00:4e:01:3d:84:9f', '3c:fd:fe:e6:01:70', '3c:fd:fe:e6:01:71'], 'memory': '1024', 'pm_addr': 'mgmt-e22-h18-b02-fc640.rdu2.scalelab.redhat.com', 'pm_password': 'rdu2@1787', 'pm_type': 'pxe_ipmitool', 'pm_user': 'quads'}
+{'arch': 'x86_64', 'cpu': '2', 'disk': '20', 'mac': ['00:4e:01:3d:84:ac', '40:a6:b7:00:40:50', '40:a6:b7:00:40:51'], 'memory': '1024', 'pm_addr': 'mgmt-e22-h18-b03-fc640.rdu2.scalelab.redhat.com', 'pm_password': 'rdu2@1787', 'pm_type': 'pxe_ipmitool', 'pm_user': 'quads'} ansible_ssh_user=root bmc_address=mgmt-{'arch': 'x86_64', 'cpu': '2', 'disk': '20', 'mac': ['00:4e:01:3d:84:ac', '40:a6:b7:00:40:50', '40:a6:b7:00:40:51'], 'memory': '1024', 'pm_addr': 'mgmt-e22-h18-b03-fc640.rdu2.scalelab.redhat.com', 'pm_password': 'rdu2@1787', 'pm_type': 'pxe_ipmitool', 'pm_user': 'quads'}
+{'arch': 'x86_64', 'cpu': '2', 'disk': '20', 'mac': ['00:4e:01:3d:84:b9', '3c:fd:fe:e6:05:90', '3c:fd:fe:e6:05:91'], 'memory': '1024', 'pm_addr': 'mgmt-e22-h18-b04-fc640.rdu2.scalelab.redhat.com', 'pm_password': 'rdu2@1787', 'pm_type': 'pxe_ipmitool', 'pm_user': 'quads'} ansible_ssh_user=root bmc_address=mgmt-{'arch': 'x86_64', 'cpu': '2', 'disk': '20', 'mac': ['00:4e:01:3d:84:b9', '3c:fd:fe:e6:05:90', '3c:fd:fe:e6:05:91'], 'memory': '1024', 'pm_addr': 'mgmt-e22-h18-b04-fc640.rdu2.scalelab.redhat.com', 'pm_password': 'rdu2@1787', 'pm_type': 'pxe_ipmitool', 'pm_user': 'quads'}

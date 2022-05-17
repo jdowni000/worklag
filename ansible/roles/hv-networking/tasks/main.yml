@@ -21,7 +21,6 @@
 #    nmcli con del "Wired connection 2"
 #    nmcli con del "Wired connection 3"
     
-
 - name: Create the baremetal bridge
   nmcli:
     type: bridge
