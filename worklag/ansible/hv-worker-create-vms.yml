@@ -1,0 +1,16 @@
+---
+# Create emulated bare-metal worker nodes via virtual machines on hypervisor host machines
+#
+# Example usage:
+#
+# ansible-playbook -i inventory/cloud42.local ansible/hv-worker-create-vms.yml
+#
+
+- name: Create emulated bm-metal worker nodes via VMs on hypervisors
+  hosts: hypervisor
+  gather_facts: false
+  vars_files:
+  - vars/hv.yml
+  roles:
+  - hv-worker-create-vms
+  

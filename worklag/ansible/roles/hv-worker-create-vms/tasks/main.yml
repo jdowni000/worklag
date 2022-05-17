@@ -1,0 +1,100 @@
+---
+# hv worker create vm tasks
+
+- name: Check if worker disk file exists
+  stat:
+    #path: "{{ hostvars[inventory_hostname]['disk_location'] }}/{{ inventory_hostname }}.qcow2"
+    path: /var/lib/libvirt/images/worker1.qcow2"
+  register: worker_disk_stat
+
+- name: show worker disk stat
+  debug:
+    var: worker_disk_stat
+
+- name: Create worker disk
+  shell: |
+    qemu-img create -f qcow2 /var/lib/libvirt/images/worker1.qcow2 50G
+  when: not worker_disk_stat.stat.exists
+
+- name: Delete old VM
+  shell: |
+    virsh undefine worker1
+  ignore_errors: yes
+
+- name: Template out kvm definition file
+  template:
+    src: kvm-def.xml.j2
+    dest: /etc/libvirt/qemu/worker1.xml
+
+- name: Create vm from xml
+  shell: |
+    virsh define /etc/libvirt/qemu/worker1.xml
+
+- name: Get all virtual machines
+  virt:
+    command: list_vms
+  register: all_vms
+
+# - name: Show virtual machines
+#   debug:
+#     var: all_vms
+
+# - name: Get XML for VM
+#   virt: 
+#     command: get_xml
+#     name: worker1
+#   register: worker1_xml
+
+- name: get uuid from xml
+  xml:
+    path: /etc/libvirt/qemu/worker1.xml
+    xpath: /domain/uuid
+    content: text
+  register: uuid
+  #delegate_to: e22-h14-b03-fc640.rdu2.scalelab.redhat.com
+
+- name: get MAC from xml
+  xml:
+    path: /etc/libvirt/qemu/worker1.xml
+    xpath: /domain/devices/interface/mac
+    content: attribute
+  register: MAC
+
+# - name: Add entry for virtual worker node to dnsmasq
+#   template: 
+#     src: "worklag.conf.j2"
+#     dest: "/etc/dnsmasq.d/worklag.conf"
+#   delegate_to: e22-h12-b03-fc640.rdu2.scalelab.redhat.com
+
+- name: Restart dnsmasq 
+  systemd:
+    state: restarted
+    enabled: true
+    name: dnsmasq 
+
+- name: Show MAC address
+  debug: 
+    var: MAC.matches[1].mac.address
+
+- name: Set the boot MAC address
+  set_fact:
+    worker_bootmac: "{{ MAC.matches[1].mac.address }}"
+
+- name: Set the UUID
+  set_fact:
+    uuid: "{{ uuid.matches[0].uuid }}"
+
+- name: show VM uuid
+  debug:
+    #var:  ((worker1_xml.get_xml.split(",")[0]).split(" ")[5])
+    #var:  (((worker1_xml.get_xml.split(",")[0]).split(" ")[5]).replace('<uuid>','').replace('</uuid>$',''))
+    #var: (uuid1.replace('<uuid>','')).replace('</uuid>.*','')
+    var: uuid
+
+- name: Template out the bmh
+  template:
+    src: "bmh.yml.j2"
+    dest: "/tmp/bmh-worker1.yml"
+    backup: true
+  delegate_to: 127.0.0.1
+
