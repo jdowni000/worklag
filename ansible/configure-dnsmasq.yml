@@ -3,11 +3,13 @@
 #
 # Example Usage:
 #
-# ansible-playbook ansible/dnsmasq.yml
+# ansible-playbook ansible/configure-dnsmasq.yml
 #
 
 - name: Configure dnsmasq
-  hosts: localhost
-  gather_facts: false
+  hosts: hv
+  vars_files:
+  - vars/hv.yml
+  - vars/lab.yml
   roles:
   - dnsmasq-install
