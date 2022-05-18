@@ -135,4 +135,20 @@
   delegate_to: 127.0.0.1
   become: true
 
+- name: Install packages
+  dnf:
+    name:
+      - "@virt"
+      - virt-install
+      - virt-viewer
+      - gcc
+      - python3-devel
+      - python3-lxml
+        #- NetworkManager-glib
+        #- nm-connection-editor
+        #- libsemanage-python
+        #- policycoreutils-python
+    state: present
+    update_cache: true
+    disable_gpg_check: yes
 
