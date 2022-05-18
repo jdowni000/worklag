@@ -1,0 +1,13 @@
+---
+# Configure dnsmasq
+#
+# Example Usage:
+#
+# ansible-playbook ansible/dnsmasq.yml
+#
+
+- name: Configure dnsmasq
+  hosts: localhost
+  gather_facts: false
+  roles:
+  - dnsmasq-install
