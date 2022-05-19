@@ -20,6 +20,21 @@
 #  shell: |
 #    nmcli con del "Wired connection 2"
 #    nmcli con del "Wired connection 3"
+
+- name: Delete the connection for baremetal interface
+  nmcli:
+    type: ethernet
+    conn_name: "{{ baremetal_nic }}"
+    ifname: "{{ baremetal_nic }}"
+    state: absent
+
+- name: Delete the connnection for the provisioning interface
+  nmcli: 
+    type: ethernet
+    ifname: "{{ provisioning_nic }}"
+    conn_name: "{{ provisioning_nic }}"
+
+    state: absent
     
 - name: Create the baremetal bridge
   nmcli:
