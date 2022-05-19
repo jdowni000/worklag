@@ -37,7 +37,7 @@ e22-h18-b04-fc640.rdu2.scalelab.redhat.com bmc_address=mgmt-e22-h18-b04-fc640.rd
 
 [hv:vars]
 ansible_user=root
-ansible_ssh_pass=
+ansible_ssh_pass=100yard-
 bmc_user=quads
 bmc_password=rdu2@1787
 network_prefix=24

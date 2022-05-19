@@ -7,9 +7,6 @@
 #
 
 - name: Configure dnsmasq
-  hosts: hv
-  vars_files:
-  - vars/hv.yml
-  - vars/lab.yml
+  hosts: bastion
   roles:
   - dnsmasq-install
