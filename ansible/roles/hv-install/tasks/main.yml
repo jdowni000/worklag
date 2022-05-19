@@ -10,10 +10,10 @@
       - gcc
       - python3-devel
       - python3-lxml
-        #- NetworkManager-glib
-        #- nm-connection-editor
-        #- libsemanage-python
-        #- policycoreutils-python
+      - NetworkManager-libnm
+      - python3-libsemanage
+      - python3-policycoreutils
+      - nm-connection-editor       
     state: present
     update_cache: true
     disable_gpg_check: yes

@@ -1,9 +1,0 @@
----
-# Hypervisor sample vars file
-
-# which lab to be deployed into:
-lab:
-
-ssh_public_key_file : ~/.ssh/id_rsa.pub
-controlplane_network: 192.168.122.0/24
-

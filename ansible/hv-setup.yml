@@ -12,6 +12,6 @@
   - vars/lab.yml
   roles:
     - hv-install
-      #- hv-networking
-      #- hv-libvirt
+    - hv-networking
+    - hv-libvirt
       #- hv-worker-create-vms
