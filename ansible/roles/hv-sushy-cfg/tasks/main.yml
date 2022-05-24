@@ -1,0 +1,8 @@
+# roles/hv-sushy-cfg/tasks/main.yml
+---
+
+- name: Set sushy configuration file
+  template:
+    src: sushy-emulator.conf
+    ##
+  tags: sushy
