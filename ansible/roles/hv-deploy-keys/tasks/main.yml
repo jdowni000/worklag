@@ -1,0 +1,20 @@
+---
+- name: check if the ssh public key exists
+  delegate_to: localhost
+  stat:
+    path: /home/kni/.ssh/id_rsa.pub
+  register: public_key
+
+- name: create the public key if it doesn't exist
+  delegate_to: localhost
+  openssh_keypair:
+    path: "~/.ssh/id_ssh"
+  when: not public_key.stat.exists
+
+- name: copy the ssh public key to users authorized_keys file
+  copy:
+    src: /home/kni/.ssh/id_rsa.pub
+    dest: /root/.ssh/authorized_keys
+    owner: root
+    group: root
+    mode: '0600'

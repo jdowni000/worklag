@@ -1,6 +1,11 @@
 ---
 # Hypervisor sample vars file
 
+ansible_ssh_user = root
+ansible_ssh_pass = 100yard-
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+
+
 # which lab to be deployed into:
 lab:
 

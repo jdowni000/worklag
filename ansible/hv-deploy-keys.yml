@@ -1,26 +1,14 @@
 ---
-- hosts: hv
-  become: yes
-  become_user: root
-  become_method: sudo 
+# Setup for the hypervsor nodes to host virtual machines that act as worker nodes
+#
+# Example usage:
+#
+# ansible-playbook -i ansible/inventory/cloud29.local ansible/hv-setup.yaml
 
-  tasks:
-    - name: check if the ssh public key exists
-      delegate_to: localhost
-      stat:
-        path: /home/kni/.ssh/id_rsa.pub
-      register: public_key
-
-    - name: create the public key if it doesn't exist
-      delegate_to: localhost
-      openssh_keypair:
-        path: "~/.ssh/id_ssh"
-      when: not public_key.stat.exists
-          
-    - name: copy the ssh public key to users authorized_keys file
-      copy:
-        src: /home/kni/.ssh/id_rsa.pub
-        dest: /root/.ssh/authorized_keys
-        owner: root
-        group: root
-        mode: '0600'
+- name: Deploy ssh keys to hv nodes
+  hosts: hv
+  vars_files:
+  - vars/all.yml
+  - vars/lab.yml
+  roles:
+    - hv-deploy-keys
