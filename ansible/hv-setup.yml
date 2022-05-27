@@ -15,4 +15,5 @@
     - hv-networking
     - hv-libvirt
     - hv-sushy-cfg
+    - hv-deploy-keys
       #- hv-worker-create-vms

@@ -1,14 +1,17 @@
 ---
 # Hypervisor sample vars file
 
-ansible_ssh_user = root
-ansible_ssh_pass = 100yard-
-ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+become: yes
+become_user: root
+become_method: sudo
+
+ansible_ssh_user: root
+ansible_ssh_pass: 
+ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
 
 
 # which lab to be deployed into:
 lab:
-
 ssh_public_key_file : ~/.ssh/id_rsa.pub
 controlplane_network: 192.168.122.0/24
 

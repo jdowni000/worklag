@@ -1,14 +1,13 @@
 ---
-# Setup for the hypervsor nodes to host virtual machines that act as worker nodes
+# dEploy ssh skyes to hv nodes
 #
 # Example usage:
 #
-# ansible-playbook -i ansible/inventory/cloud29.local ansible/hv-setup.yaml
+# ansible-playbook -i ansible/inventory/cloud29.local ansible/hv-deploy-keys.yaml
 
 - name: Deploy ssh keys to hv nodes
   hosts: hv
   vars_files:
-  - vars/all.yml
-  - vars/lab.yml
+  - vars/hv.yml
   roles:
     - hv-deploy-keys
