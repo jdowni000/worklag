@@ -1,0 +1,71 @@
+---
+# validate-vars tasks
+
+- name: Validate lab
+  fail:
+    msg: "Invalid lab selected('{{ lab }}') Select from {{ rh_labs }} and {{ cloud_labs }} "
+  when:
+  - lab not in rh_labs
+  - lab not in cloud_labs
+
+#- name: Check pull secret var is set
+#  fail:
+#    msg: "Pull secret appears unset"
+#  when: pull_secret is not defined
+
+#- name: Check for RHEL 8.4 (Bastion Validation)
+#  fail:
+#    msg: "Upgrade to RHEL 8.4 for podman host network support"
+#  when:
+#  - ansible_distribution is defined
+#  - (ansible_distribution|lower != "redhat" and ansible_distribution|lower != "centos") or ansible_distribution_version|float < 8.4
+
+- name: Set worker_node_count if undefined or empty (bm/rwn)
+  set_fact:
+    worker_node_count: "{{ allocation_node_count - 4 }}"
+  when: (cluster_type == "bm" or cluster_type == "rwn") and
+        (worker_node_count is undefined or not worker_node_count | int) and
+        ansible_play_name != "Create inventory from a lab cloud" and
+        ansible_play_name != "Create inventory from ibmcloud hardware"
+
+- name: Set sno_node_count if undefined or empty
+  set_fact:
+    sno_node_count: "{{ (allocation_node_count - 1) | int   }}"
+  when: (cluster_type == "sno")  and
+        (sno_node_count is undefined or not sno_node_count | int) and
+        ansible_play_name != "Create inventory from a lab cloud" and
+        ansible_play_name != "Create inventory from ibmcloud hardware"
+
+- name: Check if the required number of nodes exist for bm/rwn
+  fail:
+    msg: "Insufficient number of nodes in your allocation for bm/rwn"
+  when: (allocation_node_count is defined and (cluster_type == "bm" or cluster_type == "rwn")) and (worker_node_count | int  > allocation_node_count - 4)
+
+- name: Check if the required number of nodes exist for sno
+  fail:
+    msg: "Insufficient number of nodes in your allocation for bm/rwn"
+  when: (allocation_node_count is defined and cluster_type == "sno") and (sno_node_count | int   > allocation_node_count | int  - 1)
+
+# We don't need to check the network since this is already in a installed cluster
+#- name: Check if networktype is of list type and has only one value for BM/RWN
+#  fail:
+#    msg: "networktype is of list type but can have only one value for Bm/RWN clusters"
+#  when: (cluster_type == "bm" or cluster_type == "rwn") and (networktype is not iterable or networktype is string or networktype is mapping or networktype|length > 1)
+
+- name: Validate Red Hat lab vars
+  when: lab in rh_labs
+  block:
+  - name: Validate cluster_type
+    fail:
+      msg: "Invalid cluster_type selected - {{ cluster_type }} Select from {{ rh_lab_cluster_types }}"
+    when: cluster_type not in rh_lab_cluster_types
+
+- name: Check reserved_cpus var is set
+  fail:
+    msg: "reserved_cpus is unset"
+  when: (cluster_type == "sno") and (install_performance_addon_operator | default(false) | bool) and reserved_cpus is undefined
+
+- name: Check isolated_cpus var is set
+  fail:
+    msg: "isolated_cpus is unset"
+  when: (cluster_type == "sno") and (install_performance_addon_operator | default(false) | bool) and isolated_cpus is undefined

@@ -1,0 +1,138 @@
+---
+# bastion host tasks
+
+- name: Set empty list for vm_names
+  set_fact:
+    vm_names: []
+
+- name: Set empty list for prov_macs
+  set_fact:
+    prov_macs: []
+
+- name: Get MACs for all virtual machines
+  virt:
+    command: list_vms
+  register: all_vms
+
+- name: Show virtual machines
+  debug:
+    var: all_vms.list_vms
+
+# - name: loop over VM definition files
+#   debug: 
+#     var: "{{ item }}"
+#   with_filetree: /etc/
+#   when: item.state == 
+
+# - name: Get XML for VM
+#   virt: 
+#     command: get_xml
+#     name: "{{ item }}"
+#   with_items: "{{ all_vms.list_vms }}"
+#   register: all_xml
+
+# - name: Show XML
+#   debug:
+#     var: all_xml
+
+# - name: Get UUID
+#   xml:
+#     path: "{{ item }}"
+#     xpath: /domain/devices/interface/mac
+#     content: attribute
+#   register: MACS
+#   with_items: "{{ all_xml }}"
+
+- name: Find XML files for VMs
+  find:
+    paths: /etc/libvirt/qemu
+    patterns: '*.xml'
+  register: vm_files
+
+# - name: Print vm_files
+#   debug:
+#     var: vm_files
+
+- name: Create dictionary
+  set_fact:
+    dictionary: "{{ vm_files | json_query('files') }}"
+
+# - name: Print out dictionary
+#   debug:
+#     msg: "{{ dictionary }} "
+
+# - name: Print out paths
+#   debug:
+#     msg: "{{ item.path }}"
+#   loop: "{{ dictionary }}"
+
+- name: Get VM name from XML
+  xml:
+    path: "{{ item.path }}"
+    xpath: /domain/name
+    content: text
+  register: names
+  loop: "{{ dictionary }}"
+
+- name: Show names
+  debug:
+    var: names.results[0].matches[0].name
+
+- name: Get MACs from XML
+  xml:
+    path: "{{ item.path }}"
+    xpath: /domain/devices/interface/mac
+    content: attribute
+  register: macs
+  loop: "{{ dictionary }}"
+
+- name: Print MACS
+  debug:
+    var: macs.results[0].matches[0].mac.address
+
+# - name: Loop over all results
+#   debug: 
+#     var: item.matches[0].mac.address
+#   loop: "{{ macs.results }}"
+
+- name: Set fact for the VM names
+  set_fact:
+    vm_names: "{{ vm_names +  [  item.matches[0].name  ] }}"
+  loop: "{{ names.results }}"
+
+- name: Show the resulting vm names
+  debug:
+    var: vm_names
+
+- name: Set fact for the provisioning MAC
+  set_fact: 
+    prov_macs: "{{ prov_macs + [ item.matches[0].mac.address ] }}"
+  loop: "{{ macs.results }}"
+
+- name: Show the resulting MACS for provisioning
+  debug:
+    var: prov_macs
+  
+- name: Add dnsmasq entries
+  # template:
+  #   src: "worklog.conf.j2"
+  #   dest: "/etc/dnsmasq.d/worklag.conf"
+  # delegate_to: 127.0.0.1
+  lineinfile:
+    path: /etc/dnsmasq.d/workers.conf
+    state: present
+    line: 'dhcp-host={{ item.0 }},192.168.216.13,{{ item.1 }}'
+  with_together:
+    - "{{ prov_macs }}"
+    - "{{ vm_names }}"
+  delegate_to: 127.0.0.1
+  become: true
+
+- name: Restart dnsmasq
+  systemd: 
+    state: restarted
+    name: dnsmasq
+  delegate_to: 127.0.0.1
+  become: true
+
+

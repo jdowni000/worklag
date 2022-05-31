@@ -1,0 +1,180 @@
+---
+# hv worker create vm tasks
+
+- name: Create empty uuid list
+  set_fact: 
+    uuid_list: []
+
+- name: Create empty mac list
+  set_fact:
+    mac_list: []
+
+- name: Delete old VMs
+  block: 
+    - name: Undefine all VMs
+      shell: virsh list --all --name | xargs -r -n 1 virsh undefine
+
+    - name: Delete VM definition files
+      file: 
+        path: /etc/libvirt/qemu/*.xml
+        state: absent
+
+    - name: Delete VM disk images
+      file:
+        path: /var/lib/libvirt/images/worker*.qcow2
+        state: absent
+
+    - name: restart libvirtd
+      systemd: 
+        state: restarted
+        name: libvirtd
+
+- name: Check if worker disk file exists
+  stat:
+    #path: "{{ hostvars[inventory_hostname]['disk_location'] }}/{{ inventory_hostname }}.qcow2"
+    path: /var/lib/libvirt/images/worker1.qcow2"
+  register: worker_disk_stat
+
+- name: show worker disk stat
+  debug:
+    var: worker_disk_stat
+
+- name: Create worker disk
+  shell: |
+    qemu-img create -f qcow2 /var/lib/libvirt/images/worker{{ item }}.qcow2 50G
+  with_sequence: start=0 end=3 
+  when: not worker_disk_stat.stat.exists
+
+- name: Template out kvm definition file
+  template:
+    src: kvm-def.xml.j2
+    dest: /etc/libvirt/qemu/worker{{ item }}.xml
+  with_sequence: start=0 end=3 
+  loop_control:
+    index_var: idx
+
+- name: Create vm from xml
+  shell: |
+    virsh define /etc/libvirt/qemu/worker{{ item }}.xml
+  with_sequence: start=0 end=3
+
+- name: Get all virtual machines
+  virt:
+    command: list_vms
+  register: all_vms
+
+- name: Show virtual machines
+  debug:
+    var: all_vms
+
+# - name: Get XML for VM
+#   virt: 
+#     command: get_xml
+#     name: worker1
+#   register: worker1_xml
+
+- name: get uuid from xml
+  xml:
+    path: /etc/libvirt/qemu/worker{{ item }}.xml
+    xpath: /domain/uuid
+    content: text
+  register: uuid
+  with_sequence: start=0 end=3
+
+- name: show individual uuid
+  debug:
+    var: uuid.results[idx].matches
+  with_sequence: start=0 end=3
+  loop_control:
+    index_var: idx
+
+# add uuid to the list of uuids
+- name: Add uuid to the list
+  set_fact:
+    uuid_list: "{{ uuid_list + uuid.results[idx].matches }}"
+  with_sequence: start=0 end=3
+  loop_control:
+    index_var: idx
+
+- name: show uuid_list
+  debug:
+    var: uuid_list
+
+
+- name: get individual MACs
+  xml:
+    path: /etc/libvirt/qemu/worker{{ item }}.xml
+    xpath: /domain/devices/interface/mac
+    content: attribute
+  with_sequence: start=0 end=3 
+  loop_control:
+    index_var: idx
+  register: MAC
+
+- name: show individual MACs
+  debug:
+    var: MAC.results[idx].matches[1].mac
+  with_sequence: start=0 end=3
+  loop_control:
+    index_var: idx
+
+
+- name: add MACs to the list
+  set_fact:
+    mac_list: "{{ mac_list +  (MAC.results[idx].matches[1].mac)|list }}"
+  with_sequence: start=0 end=3
+  loop_control:
+    index_var: idx
+
+- name: show mac list
+  debug:
+    var: mac_list
+
+- meta: end_play
+
+#   - name: Build a list of all the MACs for the worker VMs
+#     set_fact:
+#       vm_worker_macs: "{{ vm_worker_macs }} +  MAC " 
+
+- name: Show MAC list
+  debug:
+    var: vm_worker_macs
+
+# - name: Add entry for virtual worker node to dnsmasq
+#   template: 
+#     src: "worklag.conf.j2"
+#     dest: "/etc/dnsmasq.d/worklag.conf"
+#   delegate_to: e22-h12-b03-fc640.rdu2.scalelab.redhat.com
+
+- name: Restart dnsmasq 
+  systemd:
+    state: restarted
+    enabled: true
+    name: dnsmasq 
+
+- name: Show MAC address
+  debug: 
+    var: MAC.matches[1].mac.address
+
+- name: Set the boot MAC address
+  set_fact:
+    worker_bootmac: "{{ MAC.matches[1].mac.address }}"
+
+- name: Set the UUID
+  set_fact:
+    uuid: "{{ uuid.matches[0].uuid }}"
+
+- name: show VM uuid
+  debug:
+    #var:  ((worker1_xml.get_xml.split(",")[0]).split(" ")[5])
+    #var:  (((worker1_xml.get_xml.split(",")[0]).split(" ")[5]).replace('<uuid>','').replace('</uuid>$',''))
+    #var: (uuid1.replace('<uuid>','')).replace('</uuid>.*','')
+    var: uuid
+
+- name: Template out the bmh
+  template:
+    src: "bmh.yml.j2"
+    dest: "/tmp/bmh-worker1.yml"
+    backup: true
+  delegate_to: 127.0.0.1
+
