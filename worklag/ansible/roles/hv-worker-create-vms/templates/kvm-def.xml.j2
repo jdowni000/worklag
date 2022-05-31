@@ -30,7 +30,7 @@
     <emulator>/usr/libexec/qemu-kvm</emulator>
     <disk type='file' device='disk'>
       <driver name='qemu' type='qcow2' discard='unmap'/>
-      <source file='/var/lib/libvirt/images/worker1.qcow2'/>
+      <source file='/var/lib/libvirt/images/worker{{idx}}.qcow2'/>
       <target dev='sda' bus='scsi'/>
       <address type='drive' controller='0' bus='0' target='0' unit='0'/>
     </disk>

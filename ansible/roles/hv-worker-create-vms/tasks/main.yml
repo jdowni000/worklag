@@ -13,31 +13,50 @@
 
 - name: Create worker disk
   shell: |
-    qemu-img create -f qcow2 /var/lib/libvirt/images/worker1.qcow2 50G
+    qemu-img create -f qcow2 /var/lib/libvirt/images/worker{{ item }}.qcow2 50G
+  with_sequence: start=1 end=4 stride=1
   when: not worker_disk_stat.stat.exists
 
-- name: Delete old VM
-  shell: |
-    virsh undefine worker1
-  ignore_errors: yes
+- name: Delete old VMs
+  block: 
+    - name: Undefine all VMs
+      shell: virsh list --all --name | xargs -r -n 1 virsh undefine
+
+    - name: Delete VM definition files
+      file: 
+        path: /etc/libvirt/qemu/*.qcow2
+        state: absent
+    - name: restart libvirtd
+      systemd: 
+        state: restarted
+        name: libvirtd
+
+#  shell: |
+#   virsh undefine worker{{ item }}
+# with_sequence: start=0 end=5 stride=1
+# ignore_errors: yes
 
 - name: Template out kvm definition file
   template:
     src: kvm-def.xml.j2
-    dest: /etc/libvirt/qemu/worker1.xml
+    dest: /etc/libvirt/qemu/worker{{ item }}.xml
+  with_sequence: start=0 end=3 stride=1
+  loop_control:
+    index_var: idx
 
 - name: Create vm from xml
   shell: |
-    virsh define /etc/libvirt/qemu/worker1.xml
-
+    virsh define /etc/libvirt/qemu/worker{{ item }}.xml
+  with_sequence: start=0 end=2
+        
 - name: Get all virtual machines
   virt:
     command: list_vms
   register: all_vms
 
-# - name: Show virtual machines
-#   debug:
-#     var: all_vms
+- name: Show virtual machines
+  debug:
+    var: all_vms
 
 # - name: Get XML for VM
 #   virt: 
@@ -47,18 +66,38 @@
 
 - name: get uuid from xml
   xml:
-    path: /etc/libvirt/qemu/worker1.xml
+    path: /etc/libvirt/qemu/worker{{ item }}.xml
     xpath: /domain/uuid
     content: text
   register: uuid
+  with_sequence: start=0 end=2
   #delegate_to: e22-h14-b03-fc640.rdu2.scalelab.redhat.com
 
+- name: show individual uuid
+  debug:
+    var: uuid.results
+ 
 - name: get MAC from xml
-  xml:
-    path: /etc/libvirt/qemu/worker1.xml
-    xpath: /domain/devices/interface/mac
-    content: attribute
-  register: MAC
+  block:
+    - name: get individual MACs
+      xml:
+        path: /etc/libvirt/qemu/worker{{ item }}.xml
+        xpath: /domain/devices/interface/mac
+        content: attribute
+      register: MAC
+      with_sequence: start=0 end=3 stride=1
+      
+    - name: show current mac
+      debug:
+        var: MAC.results
+
+    - name: Build a list of all the MACs for the worker VMs
+      set_fact:
+        vm_worker_macs: "{{ vm_worker_macs }} +  MAC " 
+
+- name: Show MAC list
+  debug:
+    var: vm_worker_macs
 
 # - name: Add entry for virtual worker node to dnsmasq
 #   template: 
