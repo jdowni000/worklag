@@ -7,8 +7,8 @@
 #
 
 - name: Create emulated bm-metal worker nodes via VMs on hypervisors
-  hosts: hypervisor
-  gather_facts: false
+  hosts: hv
+  gather_facts: true
   vars_files:
   - vars/hv.yml
   roles:
