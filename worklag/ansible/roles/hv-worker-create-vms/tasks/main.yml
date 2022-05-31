@@ -111,40 +111,54 @@
     index_var: idx
   register: MAC
 
-- name: show individual MACs
-  debug:
-    var: MAC.results[idx].matches[1].mac
-  with_sequence: start=0 end=3
-  loop_control:
-    index_var: idx
+#- name: show individual MACs
+# debug:
+#   var: MAC.results[idx].matches[1].mac
+# with_sequence: start=0 end=3
+# loop_control:
+#   index_var: idx
 
+#- name: show individual MACs list
+# debug:
+#   var: (MAC.results[idx].matches[1].mac.address)
+# with_sequence: start=0 end=3
+# loop_control:
+#   index_var: idx
 
 - name: add MACs to the list
   set_fact:
-    mac_list: "{{ mac_list +  (MAC.results[idx].matches[1].mac)|list }}"
+    mac_list: "{{ mac_list + [MAC.results[idx].matches[1].mac.address] }}"
   with_sequence: start=0 end=3
   loop_control:
     index_var: idx
 
-- name: show mac list
-  debug:
-    var: mac_list
+#- name: show mac list
+# debug:
+#   msg: "{{ item }}"
+# with_items:
+#   - "{{ mac_list }}"
 
-- meta: end_play
+#- name: create ip list
+#  ip_list: "{{ lookup('sequence', 'start=50 count=12 format=192.168.0.%d', wantlist=True) }}"
 
-#   - name: Build a list of all the MACs for the worker VMs
-#     set_fact:
-#       vm_worker_macs: "{{ vm_worker_macs }} +  MAC " 
+- name: Delete temporary dnsmasq config file
+  file: 
+    path: /tmp/worklag.conf
+    state: absent
+  delegate_to: localhost
 
-- name: Show MAC list
-  debug:
-    var: vm_worker_macs
+# I'm not sure what the best approach here would be - we have a list of MACs but we 
+# need to interleave it with IPs and hostnames. Maybe the entire idea is flawed and
+# we need to step back and try a different approach?  
 
-# - name: Add entry for virtual worker node to dnsmasq
-#   template: 
-#     src: "worklag.conf.j2"
-#     dest: "/etc/dnsmasq.d/worklag.conf"
-#   delegate_to: e22-h12-b03-fc640.rdu2.scalelab.redhat.com
+#- name: create dnsmasq configuration
+# copy:
+#   dest: /tmp/worklag.conf
+#   content: |
+#     {% for mac in mac_list %}
+#     address=/{{ mac }}
+#     {% endfor %}
+# delegate_to: localhost
 
 - name: Restart dnsmasq 
   systemd:
